@@ -20,6 +20,7 @@
 // THE SOFTWARE.
 
 #import "AFURLRequestSerialization.h"
+#import "Security/Security.h"
 
 #if TARGET_OS_IOS || TARGET_OS_WATCH || TARGET_OS_TV
 #import <MobileCoreServices/MobileCoreServices.h>
@@ -590,8 +591,24 @@ forHTTPHeaderField:(NSString *)field
 
 #pragma mark -
 
-static NSString * AFCreateMultipartFormBoundary() {
-    return [NSString stringWithFormat:@"Boundary+%08X%08X", arc4random(), arc4random()];
+
+static NSString * AFCreateMultipartFormBoundary(void) {
+    u_int8_t bytes[4];
+    uint32_t firstChunck = 0;
+    uint32_t secondChunck = 0;
+    
+    int status = SecRandomCopyBytes(kSecRandomDefault, (sizeof bytes)/(sizeof bytes[0]), &bytes);
+    if (status == errSecSuccess) { // Always test the status.
+        NSData * data = [NSData dataWithBytes:bytes length:4*sizeof(u_int8_t)];
+        [data getBytes:&firstChunck length:4*sizeof(u_int8_t)];
+    }
+    
+    status = SecRandomCopyBytes(kSecRandomDefault, (sizeof bytes)/(sizeof bytes[0]), &bytes);
+    if (status == errSecSuccess) { // Always test the status.
+        NSData * data = [NSData dataWithBytes:bytes length:4*sizeof(u_int8_t)];
+        [data getBytes:&secondChunck length:4*sizeof(u_int8_t)];
+    }
+    return [NSString stringWithFormat:@"Boundary+%08X%08X", firstChunck, secondChunck];
 }
 
 static NSString * const kAFMultipartFormCRLF = @"\r\n";
