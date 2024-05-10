@@ -596,17 +596,17 @@ static NSString * AFCreateMultipartFormBoundary(void) {
     u_int8_t bytes[4];
     uint32_t firstChunck = 0;
     uint32_t secondChunck = 0;
-    
+    size_t sizeInt32 = 4*sizeof(u_int8_t);
     int status = SecRandomCopyBytes(kSecRandomDefault, (sizeof bytes)/(sizeof bytes[0]), &bytes);
     if (status == errSecSuccess) { // Always test the status.
-        NSData * data = [NSData dataWithBytes:bytes length:4*sizeof(u_int8_t)];
-        [data getBytes:&firstChunck length:4*sizeof(u_int8_t)];
+        NSData * data = [NSData dataWithBytes:bytes length:sizeInt32];
+        [data getBytes:&firstChunck length:sizeInt32];
     }
     
     status = SecRandomCopyBytes(kSecRandomDefault, (sizeof bytes)/(sizeof bytes[0]), &bytes);
     if (status == errSecSuccess) { // Always test the status.
-        NSData * data = [NSData dataWithBytes:bytes length:4*sizeof(u_int8_t)];
-        [data getBytes:&secondChunck length:4*sizeof(u_int8_t)];
+        NSData * data = [NSData dataWithBytes:bytes length:sizeInt32];
+        [data getBytes:&secondChunck length:sizeInt32];
     }
     return [NSString stringWithFormat:@"Boundary+%08X%08X", firstChunck, secondChunck];
 }
